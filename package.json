@@ -1,0 +1,27 @@
+{
+  "name": "",
+  "description": "",
+  "version": "1.0.0",
+  "author": "Marco Solazzi",
+  "homepage": "https://github.com/dwightjack/",
+  "main": "index.js",
+  "module": "index.m.js",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dwightjack/"
+  },
+  "bugs": "https://github.com/dwightjack//issues",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "^1.16.4"
+  }
+}

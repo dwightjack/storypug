@@ -1,0 +1,11 @@
+.DS_Store
+*.log
+test
+examples
+.editorconfig
+.eslintignore
+.eslintrc.js
+karma*.conf.js
+rollup.*
+.rpt2_*
+tmp
