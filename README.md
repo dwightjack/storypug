@@ -1,14 +1,31 @@
-# storypug
+# Storypug
 
-Storypug makes it easy and more straightforward to use [pug](https://pugjs.org) mixins as components inside [Storybook](https://storybook.js.org) (and, incidentally, [Jest](https://jestjs.io/))
+Storypug makes it easy and more straightforward to use [pug](https://pugjs.org) mixins as components inside [Storybook](https://storybook.js.org) (and, incidentally, [Jest](https://jestjs.io/)).
 
-In a nutshell storypug let's you import [pug mixins](https://pugjs.org/language/mixins.html) as functions and render them to HTML with options.
+In a nutshell Storypug let's you import [pug mixins](https://pugjs.org/language/mixins.html) as functions and render them to HTML with options.
+
+<!-- TOC depthTo:4 -->
+
+- [Installation](#installation)
+- [Code Requirements](#code-requirements)
+- [Storybook configuration](#storybook-configuration)
+  - [Loader Options](#loader-options)
+- [Usage in Stories](#usage-in-stories)
+  - [Render Helpers](#render-helpers)
+  - [Render to a DOM Element](#render-to-a-dom-element)
+  - [Usage with @storybook/addon-knobs](#usage-with-storybookaddon-knobs)
+  - [Decorators](#decorators)
+    - [`withStyle()`](#withstyle)
+    - [`fullscreen()`](#fullscreen)
+    - [`withWrap`](#withwrap)
+
+<!-- /TOC -->
 
 ## Installation
 
 First of all setup Storybook for HTML following [this guide](https://storybook.js.org/docs/guides/guide-html/).
 
-Then you need to install both `pug` and `pug-runtime` alongside storypug:
+Then you need to install both `pug` and `pug-runtime` alongside `storypug`:
 
 ```sh
 npm i pug pug-runtime storypug -D
@@ -22,7 +39,7 @@ npm i babel-loader -D
 
 ## Code Requirements
 
-In order for storypug to work correctly you are required to define exactly **one mixin for file**.
+In order for Storypug to work correctly you are required to define exactly **one mixin per file**.
 
 ## Storybook configuration
 
@@ -39,7 +56,7 @@ module.exports = async ({ config }) => {
 };
 ```
 
-1. If using ES6+ features and you're targeting old browsers add `babel-loader` before the storypug loader.
+1. If you're using ES6+ features and you target old browsers add `babel-loader` before the storypug loader.
 
 ```diff
 module.exports = async ({ config }) => {
@@ -54,7 +71,7 @@ module.exports = async ({ config }) => {
 
 ### Loader Options
 
-The webpack loader is a wrapper around [pug-loader](https://github.com/pugjs/pug-loader) and thus will forward to it any [configuration option](https://github.com/pugjs/pug-loader#options):
+Storypug's webpack loader is a wrapper around [pug-loader](https://github.com/pugjs/pug-loader), and thus any [option](https://github.com/pugjs/pug-loader#options) set in the configuration will be forwarded to it:
 
 ```js
 module.exports = async ({ config }) => {
@@ -76,7 +93,7 @@ module.exports = async ({ config }) => {
 
 ## Usage in Stories
 
-Now that you have configured Storybook to handle `.pug` files, you can import them like JavaScript modules. The imported module will be a function that will render the mixin with options and block contents.
+Now that you have configured Storybook to handle `.pug` files, you can import them like JavaScript modules. The imported module will be a function that will render the mixin with options and a block's content.
 
 ```pug
 //- components/example.pug
@@ -106,7 +123,7 @@ storiesOf('Example', module).add('default', () => {
 });
 ```
 
-The output used for the `default` story will be:
+The output of the `default` story will be:
 
 ```html
 <div class="example">
@@ -117,7 +134,7 @@ The output used for the `default` story will be:
 
 ### Render Helpers
 
-To ease the developer experience and provide some useful defaults storypug provides a handy render helpers.
+To ease the developer experience, and provide some useful defaults, Storypug provides a handy render helpers.
 
 ```diff
 // components/example.stories.js
@@ -150,7 +167,7 @@ Storybook HTML accepts both strings and DOM elements. To render the mixin to a D
 
 import { storiesOf } from '@storybook/html';
 import startCase from 'lodash/startCase';
-+ import { renderer } from 'storypug';
+import { renderer } from 'storypug';
 import Example from './example.pug';
 
   // pass here shared locals like functions and variables
@@ -179,11 +196,11 @@ The `wrapper` object returned by `render` has the following properties:
 - `find(selector)`: a shortcut to `el.querySelector(selector)`
 - `findAll(selector)`: a shortcut to `el.querySelectorAll(selector)`
 
-Note that `$raw` differs from `html()` in that the former is a reference to the HTML generated at render time while the latter reflects any manipulation applied after rendering.
+Note that `$raw` differs from `html()` in that the former is a reference to the HTML generated at render time while the latter will reflect any manipulation applied after rendering.
 
 ### Usage with @storybook/addon-knobs
 
-Another benefit of `storypug` is the ability to use addons like [@storybook/addon-knobs](https://www.npmjs.com/package/@storybook/addon-knobs) with ease.
+Another benefit of Storypug is the ability to use addons like [@storybook/addon-knobs](https://www.npmjs.com/package/@storybook/addon-knobs) with ease.
 
 ```pug
 //- components/checkbox.pug
@@ -212,12 +229,12 @@ storiesOf('Checkbox', module).add('default', () => {
 
 ### Decorators
 
-`storypug` provides some useful decorators as well:
+Storypug provides some useful decorators as well:
 
-#### `withStyle`
+#### `withStyle()`
 
 This decorator will wrap the rendered HTML in a DOM element with custom styles.
-The decorator can be configured globally by passing styles at invocation time or locally by mean of the `style` parameter:
+The decorator can be configured globally by passing styles at invocation time or locally via the `style` parameter:
 
 ```js
 // ...
@@ -241,16 +258,12 @@ In the above example the `default` story will wrap the checkbox in a container w
 
 To skip the decorator in a story set the `style` parameter to `false`.
 
-**Note**: both `withStyle` and the `style` parameter accepts style objects, class names or an array of those. This makes is easy to use packages like [emotion](https://emotion.sh/) for local styling
+**Note**: both `withStyle` and the `style` parameter accept style objects, class names or an array of those. This makes it easy to use packages like [emotion](https://emotion.sh/) for styling:
 
 ```js
 // ...
 import { withStyle } from 'storypug';
 import { css } from 'emotion';
-
-const globalStyle = {
-  backgroundColor: 'black',
-};
 
 // lightStyle is a unique class name
 const lightStyle = css`
@@ -262,12 +275,12 @@ const redText = {
 };
 
 storiesOf('Checkbox', module)
-  .addDecorator(withStyle(globalStyle))
-  .add('default', () => html(Checkbox))
-  .add('light and red', () => html(Checkbox), { style: [lightStyle, redText] });
+  .addDecorator(withStyle([lightStyle, redText]))
+  // ^-- red color and white background
+  .add('light and red', () => html(Checkbox));
 ```
 
-#### `fullscreen`
+#### `fullscreen()`
 
 Works like `withStyle` but will add a `fullscreen` class name by default to the wrapper. This decorator is useful if you need to reset any default spacing added to the storybook's preview panel. Like `withStyle` accepts additional classes and styles both as a global styling and via the `fullscreen` parameter.
 
@@ -282,7 +295,7 @@ To skip the decorator in a story set the `fullscreen` parameter to `false`.
 
 #### `withWrap`
 
-Works like `withStyle` but let's you define the tag name you want to wrap the HTML with (defaults to `div`):
+Works like `withStyle` but lets you define the tag name of the wrapper element (defaults to `div`):
 
 ```js
 // ...
