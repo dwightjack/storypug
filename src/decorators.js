@@ -49,22 +49,20 @@ export const withStyle = (style, { asString } = {}) => (
 };
 
 export const fullscreen = (
-  className,
+  styles,
   { asString, baseClass = 'fullscreen' } = {},
 ) => (storyFn, { parameters = {} } = {}) => {
   if (parameters.fullscreen === false) {
     return storyFn();
   }
-  const wrapper = getOrCreate(`${WRAPPER_ID}--fullscreen`);
-  [baseClass, className].forEach((name) => {
-    if (name) {
-      wrapper.classList.add(name);
-    }
-  });
+  const wrapper = getOrCreate(
+    `${WRAPPER_ID}--fullscreen`,
+    [baseClass].concat(parameters.fullscreen, styles).filter((x) => x),
+  );
   return append(wrapper, storyFn(), asString);
 };
 
-export const withWrap = (className, { asString, tag = 'div' } = {}) => (
+export const withWrap = (styles, { asString, tag = 'div' } = {}) => (
   storyFn,
   { parameters = {} } = {},
 ) => {
@@ -72,6 +70,15 @@ export const withWrap = (className, { asString, tag = 'div' } = {}) => (
     return storyFn();
   }
   const wrapper = document.createElement(tag);
-  wrapper.className = parameters.wrap || className;
+  [].concat(styles, parameters.wrap).forEach((style) => {
+    if (!style) {
+      return;
+    }
+    if (typeof style === 'string') {
+      wrapper.classList.add(style);
+    } else {
+      Object.assign(wrapper.style, style);
+    }
+  });
   return append(wrapper, storyFn(), asString);
 };
