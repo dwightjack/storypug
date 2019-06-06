@@ -2,9 +2,7 @@ const renderFnWarn = () => {
   throw new Error('You must define a custom render function');
 };
 
-const renderer = (functions = {}, locals = {}, renderFn = renderFnWarn) => {
-  const baseOpts = { ...functions, ...locals };
-
+const renderer = (baseOpts = {}, renderFn = renderFnWarn) => {
   function html(Component, props = {}, contents) {
     if (typeof Component === 'function') {
       return Component(Object.assign({ props, contents }, baseOpts));
