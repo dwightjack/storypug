@@ -8,6 +8,7 @@
   "module": "dist/index.m.js",
   "license": "MIT",
   "scripts": {
+    "prepublishOnly": "yarn release",
     "lint": "eslint .",
     "build": "node ./scripts/build.js",
     "release": "yarn lint && yarn build"
