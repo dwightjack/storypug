@@ -54,7 +54,7 @@ export const withStyle = makeDecorator({
 export const fullscreen = makeDecorator({
   name: 'fullscreen',
   parameterName: 'fullscreen',
-  skipIfNoParametersOrOptions: true,
+  skipIfNoParametersOrOptions: false,
   wrapper(getStory, context, { parameters }) {
     if (parameters === false) {
       return getStory(context);
