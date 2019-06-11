@@ -13,11 +13,14 @@ In a nutshell Storypug let's you import [pug mixins](https://pugjs.org/language/
 - [Usage in Stories](#usage-in-stories)
   - [Render Helpers](#render-helpers)
   - [Render to a DOM Element](#render-to-a-dom-element)
-  - [Usage with @storybook/addon-knobs](#usage-with-storybookaddon-knobs)
+  - [Usage with `@storybook/addon-knobs`](#usage-with-storybookaddon-knobs)
   - [Decorators](#decorators)
-    - [`withStyle()`](#withstyle)
-    - [`fullscreen()`](#fullscreen)
+    - [`withStyle`](#withstyle)
+    - [`fullscreen`](#fullscreen)
     - [`withWrap`](#withwrap)
+- [Usage with Jest](#usage-with-jest)
+  - [Configuration](#configuration)
+  - [Writing tests](#writing-tests)
 
 <!-- /TOC -->
 
@@ -56,7 +59,7 @@ module.exports = async ({ config }) => {
 };
 ```
 
-1. If you're using ES6+ features and you target old browsers add `babel-loader` before the storypug loader.
+1. If you're using ES6+ features and you target old browsers add `babel-loader` before the Storypug loader.
 
 ```diff
 module.exports = async ({ config }) => {
@@ -93,7 +96,13 @@ module.exports = async ({ config }) => {
 
 ## Usage in Stories
 
-Now that you have configured Storybook to handle `.pug` files, you can import them like JavaScript modules. The imported module will be a function that will render the mixin with options and a block's content.
+Now that you have configured Storybook to handle `.pug` files, you can import them like JavaScript modules. The imported module will be a function accepting an object with the following properties:
+
+- `props`: An object passed as the first argument of the mixin
+- `contents`: an optional HTML string rendered at the mixin's `block`
+- `...`: any other property will be avaiable as pug locals.
+
+The function will return the rendered template as a string.
 
 ```pug
 //- components/example.pug
@@ -160,7 +169,7 @@ storiesOf('Example', module).add('default', () => {
 
 ### Render to a DOM Element
 
-Storybook HTML accepts both strings and DOM elements. To render the mixin to a DOM element use the `render` helper:
+Storybook HTML accepts both strings and DOM elements. To render the template to a DOM element use the `render` helper instead of `html`:
 
 ```diff
 // components/example.stories.js
@@ -188,7 +197,7 @@ storiesOf('Example', module).add('default', () => {
 
 The `wrapper` object returned by `render` has the following properties:
 
-- `$root`: reference to the rendered mixin root element
+- `$root`: a reference to the rendered mixin root element
 - `$raw`: the rendered mixin HTML as a string
 - `el`: the wrapper DOM element itself
 - `html()`: function returning the rendered mixin HTML as a string
@@ -196,9 +205,9 @@ The `wrapper` object returned by `render` has the following properties:
 - `find(selector)`: a shortcut to `el.querySelector(selector)`
 - `findAll(selector)`: a shortcut to `el.querySelectorAll(selector)`
 
-Note that `$raw` differs from `html()` in that the former is a reference to the HTML generated at render time while the latter will reflect any manipulation applied after rendering.
+**Note** that `$raw` differs from `html()` in that the former is a reference to the HTML generated at render time while the latter will reflect any manipulation applied after rendering.
 
-### Usage with @storybook/addon-knobs
+### Usage with `@storybook/addon-knobs`
 
 Another benefit of Storypug is the ability to use addons like [@storybook/addon-knobs](https://www.npmjs.com/package/@storybook/addon-knobs) with ease.
 
@@ -231,10 +240,10 @@ storiesOf('Checkbox', module).add('default', () => {
 
 Storypug provides some useful decorators as well:
 
-#### `withStyle()`
+#### `withStyle`
 
 This decorator will wrap the rendered HTML in a DOM element with custom styles.
-The decorator can be configured globally by passing styles at invocation time or locally via the `style` parameter:
+The decorator can be configured by setting the `style` parameter:
 
 ```js
 // ...
@@ -249,7 +258,8 @@ const lightStyle = {
 };
 
 storiesOf('Checkbox', module)
-  .addDecorator(withStyle(globalStyle))
+  .addDecorator(withStyle)
+  .addParameters({ style: globalStyle })
   .add('default', () => html(Checkbox))
   .add('light', () => html(Checkbox), { style: lightStyle });
 ```
@@ -258,7 +268,7 @@ In the above example the `default` story will wrap the checkbox in a container w
 
 To skip the decorator in a story set the `style` parameter to `false`.
 
-**Note**: both `withStyle` and the `style` parameter accept style objects, class names or an array of those. This makes it easy to use packages like [emotion](https://emotion.sh/) for styling:
+**Note**: the `style` parameter accepts style objects, class names or an array of those. This makes it easy to use packages like [emotion](https://emotion.sh/) for styling:
 
 ```js
 // ...
@@ -275,20 +285,27 @@ const redText = {
 };
 
 storiesOf('Checkbox', module)
-  .addDecorator(withStyle([lightStyle, redText]))
+  .addDecorator(withStyle)
+  .addParameters({ style: [lightStyle, redText] })
   // ^-- red color and white background
   .add('light and red', () => html(Checkbox));
 ```
 
-#### `fullscreen()`
+#### `fullscreen`
 
-Works like `withStyle` but will add a `fullscreen` class name by default to the wrapper. This decorator is useful if you need to reset any default spacing added to the storybook's preview panel. Like `withStyle` accepts additional classes and styles both as a global styling and via the `fullscreen` parameter.
+Works like `withStyle` but will add a `fullscreen` class name by default to the wrapper. This decorator is useful if you need to reset any default spacing added to the storybook's preview panel. Like `withStyle` accepts additional classes and styles via the `fullscreen` parameter.
 
-If you want to rename the default `fullscreen` class name to something else you can do so by passing an option object as second argument:
+If you want to rename the default `fullscreen` class name to something else you can do so by setting the `fullscreen.baseClass` property:
 
 ```js
-// ...
-.addDecorator(fullscreen(null, { baseClass: 'custom-fullscreen'}))
+import { fullscreen } from 'storypug';
+
+fullscreen.baseClass = 'custom-fullscreen';
+
+storiesOf('Story name', module)
+  // ...
+  .addDecorator(fullscreen);
+  .addParameters({ fullscreen: 'additional-class'})
 ```
 
 To skip the decorator in a story set the `fullscreen` parameter to `false`.
@@ -298,10 +315,85 @@ To skip the decorator in a story set the `fullscreen` parameter to `false`.
 Works like `withStyle` but lets you define the tag name of the wrapper element (defaults to `div`):
 
 ```js
+// wrap the story with <section class="my-class" />
+
 // ...
-.addDecorator(withWrap(myStyle, { tag: 'section' }))
+.addDecorator(withWrap)
+.addParameters({ wrap: { style: 'my-class', tag: 'section' }})
 ```
 
-Like `withStyle` accepts additional classes and styles both as a global styling and via the `wrap` parameter.
-
 To skip the decorator in a story set the `wrap` parameter to `false`.
+
+## Usage with Jest
+
+Storypug lets you use the same patterns you're using in stories to render pug templates inside Jest.
+
+This feature can be useful paired with [snapshot testing](https://jestjs.io/docs/en/snapshot-testing) and [DOM testing](https://testing-library.com/docs/dom-testing-library/intro)
+
+### Configuration
+
+Add a transform for pug files in your `jest.config.js` file:
+
+```diff
+module.exports = {
+  // ...
+  transform: {
++    '\\.pug$': 'storypug/lib/pug-jest.js',
+  },
+};
+```
+
+You can customize the pug [settings](https://pugjs.org/api/reference.html#options) by using `jest.globals`:
+
+```diff
+module.exports = {
+  // ...
++ globals: {
++   'pug-jest': {
++     basedir: '<rootDir>',
++   },
++ },
+  transform: {
+    '\\.pug$': 'storypug/lib/pug-jest.js',
+  },
+};
+```
+
+In addition to the pug options you can provide a special `functions` property with a path pointing to a module exporting an object of functions to be used inside the templates:
+
+```js
+// <rootDir>/functions.js
+
+module.exports = {
+  toUpperCase(str) {
+    return str.toUpperCase();
+  },
+  // ...
+};
+```
+
+```diff
+module.exports = {
+  // ...
+  globals: {
+    'pug-jest': {
+      basedir: '<rootDir>',
++     functions: '<rootDir>/functions.js',
+    },
+  },
+  transform: {
+    '\\.pug$': 'storypug/lib/pug-jest.js',
+  },
+};
+```
+
+The `toUpperCase` function will be available as global value in your templates:
+
+```pug
+mixin AllCaps(props={})
+  h1= toUpperCase(props.title)
+```
+
+### Writing tests
+
+Once configured, you can import your templates and use the render helpers as described in the [Storybook section](#usage-in-stories).
