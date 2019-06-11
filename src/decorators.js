@@ -1,3 +1,5 @@
+import { makeDecorator } from '@storybook/addons';
+
 const WRAPPER_ID = 'storypug-wrapper';
 
 function getOrCreate(id, styles = []) {
@@ -23,62 +25,71 @@ function getOrCreate(id, styles = []) {
   return element;
 }
 
-// TODO: return the element node when https://github.com/storybooks/storybook/issues/5017 is resolved
-function append(wrapper, component, asString = true) {
+function append(wrapper, component) {
   if (typeof component === 'string') {
     wrapper.innerHTML = component;
-  } else {
-    wrapper.textContent = '';
-    wrapper.appendChild(component);
+    return wrapper.outerHTML;
   }
-  return asString ? wrapper.outerHTML : wrapper;
+  wrapper.textContent = '';
+  wrapper.appendChild(component);
+  return wrapper;
 }
 
-export const withStyle = (style, { asString } = {}) => (
-  storyFn,
-  { parameters = {} } = {},
-) => {
-  if (parameters.style === false) {
-    return storyFn();
-  }
-  const wrapper = getOrCreate(
-    WRAPPER_ID,
-    [style].concat(parameters.style).filter((x) => x),
-  );
-  return append(wrapper, storyFn(), asString);
-};
-
-export const fullscreen = (
-  styles,
-  { asString, baseClass = 'fullscreen' } = {},
-) => (storyFn, { parameters = {} } = {}) => {
-  if (parameters.fullscreen === false) {
-    return storyFn();
-  }
-  const wrapper = getOrCreate(
-    `${WRAPPER_ID}--fullscreen`,
-    [baseClass].concat(parameters.fullscreen, styles).filter((x) => x),
-  );
-  return append(wrapper, storyFn(), asString);
-};
-
-export const withWrap = (styles, { asString, tag = 'div' } = {}) => (
-  storyFn,
-  { parameters = {} } = {},
-) => {
-  if (parameters.wrap === false) {
-    return storyFn();
-  }
-  const wrapper = document.createElement(tag);
-  [].concat(styles, parameters.wrap).forEach((style) => {
-    if (!style) {
-      return;
+export const withStyle = makeDecorator({
+  name: 'withStyle',
+  parameterName: 'style',
+  skipIfNoParametersOrOptions: true,
+  wrapper(getStory, context, { parameters }) {
+    if (parameters === false) {
+      return getStory(context);
     }
-    if (typeof style === 'string') {
-      wrapper.classList.add(style);
-    } else {
-      Object.assign(wrapper.style, style);
+    const wrapper = getOrCreate(
+      WRAPPER_ID,
+      [].concat(parameters).filter((x) => x),
+    );
+    return append(wrapper, getStory(context));
+  },
+});
+
+export const fullscreen = makeDecorator({
+  name: 'fullscreen',
+  parameterName: 'fullscreen',
+  skipIfNoParametersOrOptions: true,
+  wrapper(getStory, context, { parameters }) {
+    if (parameters === false) {
+      return getStory(context);
     }
-  });
-  return append(wrapper, storyFn(), asString);
-};
+    const wrapper = getOrCreate(
+      `${WRAPPER_ID}--fullscreen`,
+      [fullscreen.baseClass].concat(parameters).filter((x) => x),
+    );
+    return append(wrapper, getStory(context));
+  },
+});
+
+fullscreen.baseClass = 'fullscreen';
+
+export const withWrap = makeDecorator({
+  name: 'withWrap',
+  parameterName: 'wrap',
+  skipIfNoParametersOrOptions: true,
+  wrapper(getStory, context, { parameters = {} }) {
+    if (parameters === false) {
+      return getStory(context);
+    }
+    const { tag = 'div', style } = parameters;
+
+    const wrapper = document.createElement(tag);
+    [].concat(style).forEach((style) => {
+      if (!style) {
+        return;
+      }
+      if (typeof style === 'string') {
+        wrapper.classList.add(style);
+      } else {
+        Object.assign(wrapper.style, style);
+      }
+    });
+    return append(wrapper, getStory(context));
+  },
+});
