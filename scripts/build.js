@@ -9,7 +9,6 @@ const del = require('del');
     const output = await bundle({
       entries: ['./src/index.js'],
       format: 'cjs,es',
-      output: 'dist',
       cwd,
     });
     console.log(output);
