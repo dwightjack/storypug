@@ -319,10 +319,10 @@ Works like `withStyle` but lets you define the tag name of the wrapper element (
 
 // ...
 .addDecorator(withWrap)
-.addParameters({ wrap: { style: 'my-class', tag: 'section' }})
+.addParameters({ style: { style: 'my-class', tag: 'section' }})
 ```
 
-To skip the decorator in a story set the `wrap` parameter to `false`.
+To skip the decorator in a story set the `style` parameter to `false`.
 
 ## Usage with Jest
 
