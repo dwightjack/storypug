@@ -359,41 +359,6 @@ module.exports = {
 };
 ```
 
-In addition to the pug options you can provide a special `functions` property with a path pointing to a module exporting an object of functions to be used inside the templates:
-
-```js
-// <rootDir>/functions.js
-
-module.exports = {
-  toUpperCase(str) {
-    return str.toUpperCase();
-  },
-  // ...
-};
-```
-
-```diff
-module.exports = {
-  // ...
-  globals: {
-    'pug-jest': {
-      basedir: '<rootDir>',
-+     functions: '<rootDir>/functions.js',
-    },
-  },
-  transform: {
-    '\\.pug$': 'storypug/lib/pug-jest.js',
-  },
-};
-```
-
-The `toUpperCase` function will be available as global value in your templates:
-
-```pug
-mixin AllCaps(props={})
-  h1= toUpperCase(props.title)
-```
-
 ### Writing tests
 
 Once configured, you can import your templates and use the render helpers as described in the [Storybook section](#usage-in-stories).
