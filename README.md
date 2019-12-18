@@ -9,6 +9,8 @@ In a nutshell Storypug let's you import [pug mixins](https://pugjs.org/language/
 - [Installation](#installation)
 - [Code Requirements](#code-requirements)
 - [Storybook configuration](#storybook-configuration)
+  - [As a preset](#as-a-preset)
+  - [Manual Setup](#manual-setup)
   - [Loader Options](#loader-options)
 - [Usage in Stories](#usage-in-stories)
   - [Render Helpers](#render-helpers)
@@ -45,6 +47,43 @@ npm i babel-loader -D
 In order for Storypug to work correctly you are required to define exactly **one mixin per file**.
 
 ## Storybook configuration
+
+### As a preset
+
+Add the following to `.storybook/presets.js`:
+
+```js
+module.exports = ['storypug/lib/preset'];
+```
+
+You can customize the preset with the following options:
+
+| name            | type     | default | description                                           |
+| --------------- | -------- | ------- | ----------------------------------------------------- |
+| `include`       | string[] |         | [Include rule][1] for `/\.pug?\$/`                    |
+| `babel`         | boolean  | false   | Transpile the pug template with babel                 |
+| `babelOptions`  | object   |         | (Optional) `babel-loader` custom options              |
+| `loaderOptions` | object   |         | (Optional) Storypug loader [options](#loader-options) |
+
+[1]: https://webpack.js.org/configuration/module/#ruleinclude
+
+Example:
+
+```js
+module.exports = [
+  {
+    name: 'storypug/lib/preset',
+    options: {
+      babel: true, //use babel-loader
+      loaderOptions: {
+        root: 'src/components', // use src components as the pug root inclusion path
+      },
+    },
+  },
+];
+```
+
+### Manual Setup
 
 1. Create a `.storybook/webpack.config.js` file in your project's root folder.
 1. Add the module loader for `.pug` files:
@@ -96,6 +135,8 @@ module.exports = async ({ config }) => {
 
 ## Usage in Stories
 
+**Note: This documentation uses Storybook's [Component Story Format](https://storybook.js.org/docs/formats/component-story-format/), but the [storiesOf API](https://storybook.js.org/docs/formats/storiesof-api/) is supported as well.**
+
 Now that you have configured Storybook to handle `.pug` files, you can import them like JavaScript modules. The imported module will be a function accepting an object with the following properties:
 
 - `props`: An object passed as the first argument of the mixin
@@ -118,18 +159,21 @@ mixin Example (props = {})
 ```js
 // components/example.stories.js
 
-import { storiesOf } from '@storybook/html';
 import startCase from 'lodash/startCase';
 import Example from './example.pug';
 
-storiesOf('Example', module).add('default', () => {
+export default {
+  title: 'Example',
+};
+
+export const Basic = () => {
   // setup properties
   const props = { intro: 'This is an intro' };
   // this HTML will be rendered inside the mixin's block
   const contents = '<p>Example body</p>';
 
   return Example({ props, contents, startCase });
-});
+};
 ```
 
 The output of the `default` story will be:
@@ -148,7 +192,6 @@ To ease the developer experience, and provide some useful defaults, Storypug pro
 ```diff
 // components/example.stories.js
 
-import { storiesOf } from '@storybook/html';
 import startCase from 'lodash/startCase';
 + import { renderer } from 'storypug';
 import Example from './example.pug';
@@ -156,7 +199,11 @@ import Example from './example.pug';
 + // pass here shared locals like functions and variables
 + const { html } = renderer({ startCase });
 
-storiesOf('Example', module).add('default', () => {
+export default {
+  title: 'Example',
+};
+
+export const Basic = () => {
   // setup properties
   const props = { intro: 'This is an intro' };
   // this HTML will be rendered inside the mixin's block
@@ -164,7 +211,7 @@ storiesOf('Example', module).add('default', () => {
 
 - return Example({ props, contents, startCase });
 + return html(Example, props, contents);
-});
+};
 ```
 
 ### Render to a DOM Element
@@ -174,7 +221,6 @@ Storybook HTML accepts both strings and DOM elements. To render the template to 
 ```diff
 // components/example.stories.js
 
-import { storiesOf } from '@storybook/html';
 import startCase from 'lodash/startCase';
 import { renderer } from 'storypug';
 import Example from './example.pug';
@@ -183,7 +229,11 @@ import Example from './example.pug';
 - const { html } = renderer({ startCase });
 + const { render } = renderer({ startCase });
 
-storiesOf('Example', module).add('default', () => {
+export default {
+  title: 'Example',
+};
+
+export const Basic = () => {
   // setup properties
   const props = { intro: 'This is an intro' };
   // this HTML will be rendered inside the mixin's block
@@ -192,7 +242,7 @@ storiesOf('Example', module).add('default', () => {
 - return html(Example, props, contents);
 + const wrapper = render(Example, props, contents);
 + return wrapper.$root;
-});
+};
 ```
 
 The `wrapper` object returned by `render` has the following properties:
@@ -221,7 +271,6 @@ mixin Checkbox(props={})
 ```js
 // components/checkbox.stories.js
 
-import { storiesOf } from '@storybook/html';
 import { boolean } from '@storybook/addon-knobs';
 import { renderer } from 'storypug';
 import Checkbox from './checkbox.pug';
@@ -229,11 +278,15 @@ import Checkbox from './checkbox.pug';
 const { html } = renderer();
 const defaultProps = { value: 'on' };
 
-storiesOf('Checkbox', module).add('default', () => {
+export default {
+  title: 'Checkbox',
+};
+
+export const Basic = () => {
   const checked = boolean('Checked', false);
 
   return html(Checkbox, { ...defaultProps, checked });
-});
+};
 ```
 
 ### Decorators
@@ -257,11 +310,21 @@ const lightStyle = {
   backgroundColor: 'white',
 };
 
-storiesOf('Checkbox', module)
-  .addDecorator(withStyle)
-  .addParameters({ style: globalStyle })
-  .add('default', () => html(Checkbox))
-  .add('light', () => html(Checkbox), { style: lightStyle });
+export default {
+  title: 'Checkbox',
+  decorators: [withStyle],
+  parameters: {
+    style: globalStyle,
+  },
+};
+
+export const Basic = () => html(Checkbox);
+
+export const Light = () => html(Checkbox);
+
+Light.story = {
+  parameters: [{ style: lightStyle }],
+};
 ```
 
 In the above example the `default` story will wrap the checkbox in a container with black background, while the `light` story will have it white.
@@ -284,11 +347,20 @@ const redText = {
   color: 'red',
 };
 
-storiesOf('Checkbox', module)
-  .addDecorator(withStyle)
-  .addParameters({ style: [lightStyle, redText] })
-  // ^-- red color and white background
-  .add('light and red', () => html(Checkbox));
+export default {
+  title: 'Checkbox',
+  decorators: [withStyle],
+};
+
+// ...
+
+export const LightAndRed = () => html(Checkbox);
+
+LightAndRed.story = {
+  parameters: {
+    style: [lightStyle, redText],
+  },
+};
 ```
 
 #### `fullscreen`
@@ -302,10 +374,11 @@ import { fullscreen } from 'storypug';
 
 fullscreen.baseClass = 'custom-fullscreen';
 
-storiesOf('Story name', module)
-  // ...
-  .addDecorator(fullscreen);
-  .addParameters({ fullscreen: 'additional-class'})
+export default {
+  title: 'Story name',
+  decorators: [fullscreen],
+  parameters: { fullscreen: 'additional-class' },
+};
 ```
 
 To skip the decorator in a story set the `fullscreen` parameter to `false`.
@@ -318,11 +391,14 @@ Works like `withStyle` but lets you define the tag name of the wrapper element (
 // wrap the story with <section class="my-class" />
 
 // ...
-.addDecorator(withWrap)
-.addParameters({ style: { style: 'my-class', tag: 'section' }})
+export default {
+  title: 'Story name',
+  decorators: [withWrap],
+  parameters: { wrap: { style: 'my-class', tag: 'section' } },
+};
 ```
 
-To skip the decorator in a story set the `style` parameter to `false`.
+To skip the decorator in a story set the `wrap` parameter to `false`.
 
 ## Usage with Jest
 
