@@ -58,12 +58,12 @@ module.exports = ['storypug/lib/preset'];
 
 You can customize the preset with the following options:
 
-| name            | type     | default | description                                           |
-| --------------- | -------- | ------- | ----------------------------------------------------- |
-| `include`       | string[] |         | [Include rule][1] for `/\.pug?\$/`                    |
-| `babel`         | boolean  | false   | Transpile the pug template with babel                 |
-| `babelOptions`  | object   |         | (Optional) `babel-loader` custom options              |
-| `loaderOptions` | object   |         | (Optional) Storypug loader [options](#loader-options) |
+| name                 | type     | default | description                                           |
+| -------------------- | -------- | ------- | ----------------------------------------------------- |
+| `include`            | string[] |         | [Include rule][1] for `/\.pug?\$/`                    |
+| `babel`              | boolean  | false   | Transpile the pug template with babel                 |
+| `babelLoaderOptions` | object   |         | (Optional) `babel-loader` custom options              |
+| `loaderOptions`      | object   |         | (Optional) Storypug loader [options](#loader-options) |
 
 [1]: https://webpack.js.org/configuration/module/#ruleinclude
 
