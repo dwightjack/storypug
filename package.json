@@ -1,24 +1,29 @@
 {
   "name": "storypug",
   "description": "A set of utilities to ease using pug templates in Storybook",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "author": "Marco Solazzi",
   "homepage": "https://github.com/dwightjack/storypug",
   "main": "dist/index.js",
   "module": "dist/index.m.js",
   "license": "MIT",
   "scripts": {
-    "prepublishOnly": "yarn release",
+    "prepublishOnly": "run-s release",
     "lint": "eslint .",
     "build": "node ./scripts/build.js",
-    "release": "yarn lint && yarn build"
+    "release": "run-s lint build"
   },
   "files": [
     "dist",
     "lib"
   ],
+  "keywords": [
+    "addon",
+    "storybook",
+    "pug"
+  ],
   "dependencies": {
-    "@storybook/addons": "^5.0.0",
+    "@storybook/addons": "^5.2.8",
     "loader-utils": "^1.2.3",
     "pug-loader": "^2.4.0"
   },
@@ -31,15 +36,16 @@
   },
   "bugs": "https://github.com/dwightjack/storypug/issues",
   "devDependencies": {
-    "del": "^4.1.1",
-    "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-prettier": "^3.0.1",
+    "del": "^5.1.0",
+    "eslint": "^6.7.2",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "microbundle": "^0.11.0",
-    "prettier": "^1.16.4",
-    "pug": "^2.0.0",
-    "pug-runtime": "^2.0.0"
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.19.1",
+    "pug": "^2.0.4",
+    "pug-runtime": "^2.0.5"
   },
   "peerDependencies": {
     "pug": "*",
