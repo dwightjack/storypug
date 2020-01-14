@@ -10,6 +10,8 @@ In a nutshell Storypug let's you import [pug mixins](https://pugjs.org/language/
 - [Code Requirements](#code-requirements)
 - [Storybook configuration](#storybook-configuration)
   - [As a preset](#as-a-preset)
+    - [Storybook 5.3+](#storybook-53)
+    - [Storybook <=5.2](#storybook-52)
   - [Manual Setup](#manual-setup)
   - [Loader Options](#loader-options)
 - [Usage in Stories](#usage-in-stories)
@@ -50,10 +52,14 @@ In order for Storypug to work correctly you are required to define exactly **one
 
 ### As a preset
 
-Add the following to `.storybook/presets.js`:
+#### Storybook 5.3+
+
+Add the following to `.storybook/main.js`:
 
 ```js
-module.exports = ['storypug/lib/preset'];
+module.exports = {
+  addons: ['storypug'],
+};
 ```
 
 You can customize the preset with the following options:
@@ -70,9 +76,35 @@ You can customize the preset with the following options:
 Example:
 
 ```js
+module.exports = {
+  addons: [
+    {
+      name: 'storypug',
+      options: {
+        babel: true, //use babel-loader
+        loaderOptions: {
+          root: 'src/components', // use src components as the pug root inclusion path
+        },
+      },
+    },
+  ],
+};
+```
+
+#### Storybook <=5.2
+
+Add the following to `.storybook/preset.js`:
+
+```js
+module.exports = ['storypug/preset'];
+```
+
+Or with options:
+
+```js
 module.exports = [
   {
-    name: 'storypug/lib/preset',
+    name: 'storypug/preset',
     options: {
       babel: true, //use babel-loader
       loaderOptions: {
