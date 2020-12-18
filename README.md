@@ -17,7 +17,7 @@ In a nutshell, Storypug let's you import [pug mixins](https://pugjs.org/language
 - [Usage in Stories](#usage-in-stories)
   - [Render Helpers](#render-helpers)
   - [Render to a DOM Element](#render-to-a-dom-element)
-  - [Usage with `@storybook/addon-knobs`](#usage-with-storybookaddon-knobs)
+  - [Usage with `@storybook/addon-knobs` or story args](#usage-with-storybookaddon-knobs-or-storyargs)
   - [Decorators](#decorators)
     - [`withStyle`](#withstyle)
     - [`fullscreen`](#fullscreen)
