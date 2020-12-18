@@ -2,7 +2,7 @@
 
 Storypug makes it easy and more straightforward to use [pug](https://pugjs.org) mixins as components inside [Storybook](https://storybook.js.org) (and, incidentally, [Jest](https://jestjs.io/)).
 
-In a nutshell Storypug let's you import [pug mixins](https://pugjs.org/language/mixins.html) as functions and render them to HTML with options.
+In a nutshell, Storypug let's you import [pug mixins](https://pugjs.org/language/mixins.html) as functions and render them to HTML with options.
 
 <!-- TOC depthTo:4 -->
 
@@ -30,7 +30,7 @@ In a nutshell Storypug let's you import [pug mixins](https://pugjs.org/language/
 
 ## Installation
 
-First of all setup Storybook for HTML following [this guide](https://storybook.js.org/docs/guides/guide-html/).
+First of all, setup Storybook for HTML following [this guide](https://storybook.js.org/docs/guides/guide-html/).
 
 Then you need to install both `pug` and `pug-runtime` alongside `storypug`:
 
@@ -46,7 +46,7 @@ npm i babel-loader -D
 
 ## Code Requirements
 
-In order for Storypug to work correctly you are required to define exactly **one mixin per file**.
+In order for Storypug to work correctly you need to define exactly **one mixin per file**.
 
 ## Storybook configuration
 
@@ -173,7 +173,7 @@ Now that you have configured Storybook to handle `.pug` files, you can import th
 
 - `props`: An object passed as the first argument of the mixin
 - `contents`: an optional HTML string rendered at the mixin's `block`
-- `...`: any other property will be avaiable as pug locals.
+- `...`: any other property will be available as pug locals.
 
 The function will return the rendered template as a string.
 
@@ -219,7 +219,7 @@ The output of the `default` story will be:
 
 ### Render Helpers
 
-To ease the developer experience, and provide some useful defaults, Storypug provides a handy render helpers.
+To ease the developer experience, Storypug provides a handy render helper.
 
 ```diff
 // components/example.stories.js
@@ -280,7 +280,7 @@ export const Basic = () => {
 The `wrapper` object returned by `render` has the following properties:
 
 - `$root`: a reference to the rendered mixin root element
-- `$raw`: the rendered mixin HTML as a string
+- `$raw`: the rendered mixin as a string
 - `el`: the wrapper DOM element itself
 - `html()`: function returning the rendered mixin HTML as a string
 - `outer()`: function returning the wrapper HTML as a string
@@ -289,7 +289,7 @@ The `wrapper` object returned by `render` has the following properties:
 
 **Note** that `$raw` differs from `html()` in that the former is a reference to the HTML generated at render time while the latter will reflect any manipulation applied after rendering.
 
-### Usage with `@storybook/addon-knobs`
+### Usage with `@storybook/addon-knobs` or storyArgs
 
 Another benefit of Storypug is the ability to use addons like [@storybook/addon-knobs](https://www.npmjs.com/package/@storybook/addon-knobs) with ease.
 
@@ -317,6 +317,33 @@ export default {
 export const Basic = () => {
   const checked = boolean('Checked', false);
 
+  return html(Checkbox, { ...defaultProps, checked });
+};
+```
+
+The same story can be written using Storybook 6+ [args](https://storybook.js.org/docs/react/writing-stories/args):
+
+```js
+// components/checkbox.stories.js
+
+import { renderer } from 'storypug';
+import Checkbox from './checkbox.pug';
+
+const { html } = renderer();
+const defaultProps = { value: 'on' };
+
+export default {
+  title: 'Checkbox',
+  argTypes: {
+    checked: {
+      type: 'boolean',
+      name: 'Checked',
+      control: 'boolean'
+    }
+  }
+};
+
+export const Basic = ({ checked = false }) => {
   return html(Checkbox, { ...defaultProps, checked });
 };
 ```
