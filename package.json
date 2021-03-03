@@ -45,7 +45,7 @@
     "microbundle": "^0.11.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "pug-runtime": "^2.0.5"
   },
   "peerDependencies": {
